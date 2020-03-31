@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -5,9 +6,13 @@ using UnityEngine.UI;
 
 namespace TyTe {
 
+    // =========================================================================
     struct TilePos {
+        // INSTANCE VARIABLES --------------------------------------------------
         public int x;
         public int y;
+
+        // CONSTRUCTORS --------------------------------------------------------
         public TilePos(
             int x,
             int y
@@ -15,26 +20,56 @@ namespace TyTe {
             this.x = x;
             this.y = y;
         }
+
+        // STATIC METHODS ------------------------------------------------------
+        public static bool operator ==(TilePos a, TilePos b) {
+            return a.x == b.x && a.y == b.y;
+        }
+
+        public static bool operator !=(TilePos a, TilePos b) {
+            return a.x != b.x || a.y != b.y;
+        }
+
+        // INSTANCE METHODS ----------------------------------------------------
+        public override bool Equals(
+            System.Object obj
+        ) {
+            return obj is TilePos && this == (TilePos)obj;
+        }
+
+        public override int GetHashCode() {
+            return x.GetHashCode() ^ y.GetHashCode();
+        }
+
+        public override string ToString() {
+            return "[" + x + "," + y + "]";
+        }
     }
 
+    // =========================================================================
     public class UxGridCtrlCtx {
+        // INSTANCE VARIABLES --------------------------------------------------
         public Func<ToolKind> getCurrentToolFcn;
         public Func<SpriteRecord> getCurrentSpriteFcn;
         public Func<int,SpriteRecord> lookupSpriteFcn;
         public Action<int> setSpriteFcn;
     }
 
+    // =========================================================================
     public class UxGridCtrl : MonoBehaviour {
+        // INSTANCE VARIABLES --------------------------------------------------
         public RectTransform contentTransform;
         public GameObject spritePrefab;
-
         Layer layer;
         UxGridCtrlCtx ctrlCtx;
+        Dictionary<TilePos,Image> imageMap = new Dictionary<TilePos, Image>();
 
+        // UNITY METHODS -------------------------------------------------------
         void Awake() {
             Select(false);
         }
 
+        // INSTANCE METHODS ----------------------------------------------------
         public void AssignCtx(
             UxGridCtrlCtx ctrlCtx
         ) {
@@ -55,20 +90,17 @@ namespace TyTe {
             // -- start 0,0 representing top-left corner
             for (var y=0; y<layer.height; y++)
             for (var x=0; x<layer.width; x++) {
+                var pos = new TilePos(x,y);
                 var spriteGO = UnityEngine.Object.Instantiate(spritePrefab, contentTransform);
                 var img = spriteGO.GetComponent<Image>();
                 var id = layer.Get(x,y);
                 if (img != null) {
-                    var record = ctrlCtx.lookupSpriteFcn(id);
-                    if (record != null) {
-                        img.sprite = record.sprite;
-                        img.color = Color.white;
-                    }
+                    imageMap[pos] = img;
+                    AssignTile(img, pos, ctrlCtx.lookupSpriteFcn(id));
                 }
                 // wire handlers
                 var btn = spriteGO.GetComponent<Button>();
                 if (btn != null) {
-                    var pos = new TilePos(x,y);
                     btn.onClick.AddListener(() => OnTileClick(img, pos));
                 }
             }
@@ -126,6 +158,7 @@ namespace TyTe {
                 AssignTile(img, pos, ctrlCtx.getCurrentSpriteFcn());
                 break;
             case ToolKind.fill:
+                Fill(pos, ctrlCtx.getCurrentSpriteFcn());
                 break;
             case ToolKind.erase:
                 ClearTile(img, pos);
@@ -136,6 +169,45 @@ namespace TyTe {
                     ctrlCtx.setSpriteFcn(id);
                 }
                 break;
+            }
+        }
+
+        void Fill(
+            TilePos startPos,
+            SpriteRecord sprite
+        ) {
+            // get starting tile kind
+            var matchID = layer.Get(startPos.x, startPos.y);
+            var visited = new HashSet<TilePos>();
+            var traverse = new List<TilePos>();
+            // add starting node to traverse list
+            traverse.Add(startPos);
+            // iterate through list of nodes to traverse
+            while (traverse.Count > 0) {
+                var pos = traverse[0];
+                traverse.RemoveAt(0);
+                // update current node
+                AssignTile(imageMap[pos], pos, sprite);
+                visited.Add(pos);
+                // check/add neighbors
+                var neighbors = new TilePos[] {
+                    new TilePos(pos.x-1,pos.y),
+                    new TilePos(pos.x+1,pos.y),
+                    new TilePos(pos.x,pos.y-1),
+                    new TilePos(pos.x,pos.y+1),
+                };
+                foreach (var neighbor in neighbors) {
+                    // bounds
+                    if (neighbor.x < 0 || neighbor.x >= layer.width || neighbor.y < 0 || neighbor.y >= layer.height) continue;
+                    // visited
+                    if (visited.Contains(neighbor)) continue;
+                    // already set to traverse
+                    if (traverse.Contains(neighbor)) continue;
+                    // non-matching tile
+                    if (layer.Get(neighbor.x, neighbor.y) != matchID) continue;
+                    // tile matches
+                    traverse.Add(neighbor);
+                }
             }
         }
 

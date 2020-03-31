@@ -16,6 +16,8 @@ namespace TyTe {
         // INSTANCE VARIABLES --------------------------------------------------
         public RectTransform contentTransform;
         public GameObject gridPrefab;
+        bool needResize = true;
+        RectTransform resizeTransform = null;
 
         Dictionary<Layer,UxGridCtrl> gridMap = new Dictionary<Layer, UxGridCtrl>();
         UxGridMgrCtrlCtx ctx;
@@ -37,6 +39,19 @@ namespace TyTe {
             gridCtrl.AssignLayer(layer);
             // store controller to gridmap
             gridMap[layer] = gridCtrl;
+            // resize content window to be same size as grid
+            if (needResize) {
+                resizeTransform = (RectTransform) gridGO.transform;
+                needResize = false;
+            }
+        }
+
+
+        void Update() {
+            if (resizeTransform) {
+                contentTransform.sizeDelta = new Vector2(resizeTransform.rect.width, resizeTransform.rect.height);
+                resizeTransform = null;
+            }
         }
 
         public void Raise(
@@ -95,6 +110,7 @@ namespace TyTe {
             foreach (var key in keys) {
                 Remove(key);
             }
+            needResize = true;
         }
 
     }
