@@ -6,14 +6,14 @@ namespace TyTe {
 
     [Serializable]
     public class Project {
-        [Tooltip("absolute path for project root")]
+        public const int maxTileWidth = 128;
+        public const int maxTileHeight = 128;
         public string projectPath;
-        [Tooltip("relative path to zone level data folder")]
         public string zoneFolder = "src/zones";
-        [Tooltip("relative path to sprite folder")]
         public string spriteFolder = "src/img";
-        [Tooltip("sprite record filename, maps sprite ids to files and provides info on sprites")]
         public string spriteJson = "src/img/sprites.json";
+        public int tileWidth = 32;
+        public int tileHeight = 32;
 
         public static Project FromJson(
             string json
@@ -31,6 +31,8 @@ namespace TyTe {
             if (!Directory.Exists(Path.Combine(projectPath, zoneFolder))) return false;
             if (!Directory.Exists(Path.Combine(projectPath, spriteFolder))) return false;
             if (!File.Exists(Path.Combine(projectPath, spriteJson))) return false;
+            if (tileWidth <= 0 || tileWidth>maxTileWidth) return false;
+            if (tileHeight <= 0 || tileHeight>maxTileHeight) return false;
             return true;
         }
 

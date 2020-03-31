@@ -83,6 +83,7 @@ namespace TyTe {
             this.ctx = ctx;
             // assign ctrl context
             ctx.ctrl.Assign( new UxSpriteMgrCtrlCtx {
+                project = ctx.project,
                 selectSpriteFcn = (record) => { 
                     selectedSprite = record; 
                 },

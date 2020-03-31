@@ -21,6 +21,7 @@ namespace TyTe {
     // =========================================================================
     // contract between manager and controller
     public class UxSpriteMgrCtrlCtx {
+        public Project project;
         public Action<SpriteRecord> selectSpriteFcn;
         public Action reloadFcn;
     }
@@ -44,6 +45,11 @@ namespace TyTe {
             this.mgrCtx = mgrCtx;
             // wire listeners
             reloadButton.onClick.AddListener( () => { this.mgrCtx.reloadFcn(); });
+            // update content transform grid layout for tile size
+            var gridLayout = contentTransform.GetComponent<GridLayoutGroup>();
+            if (gridLayout != null) {
+                gridLayout.cellSize = new Vector2(mgrCtx.project.tileWidth, mgrCtx.project.tileHeight);
+            }
         }
 
         public void Clear() {

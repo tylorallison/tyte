@@ -69,6 +69,14 @@ namespace TyTe {
                     project.spriteJson = val;
                     Save();
                 },
+                chgTileWidthFcn = (val) => {
+                    project.tileWidth = val;
+                    Save();
+                },
+                chgTileHeightFcn = (val) => {
+                    project.tileHeight = val;
+                    Save();
+                },
             });
             ctrl.AssignProject( project );
             // now hide the current panel
@@ -111,6 +119,7 @@ namespace TyTe {
             // setup grid manager
             gridCtrl.AssignCtx( new UxGridMgrCtrlCtx {
                 gridCtrlCtx = new UxGridCtrlCtx {
+                    project = project,
                     getCurrentToolFcn = () => toolMgr.selected,
                     getCurrentSpriteFcn = () => spriteMgr.selected,
                     lookupSpriteFcn = spriteMgr.Lookup,

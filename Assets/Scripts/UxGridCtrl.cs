@@ -49,6 +49,7 @@ namespace TyTe {
     // =========================================================================
     public class UxGridCtrlCtx {
         // INSTANCE VARIABLES --------------------------------------------------
+        public Project project;
         public Func<ToolKind> getCurrentToolFcn;
         public Func<SpriteRecord> getCurrentSpriteFcn;
         public Func<int,SpriteRecord> lookupSpriteFcn;
@@ -86,6 +87,7 @@ namespace TyTe {
             if (grid == null) return;
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = layer.width;
+            grid.cellSize = new Vector2(ctrlCtx.project.tileWidth, ctrlCtx.project.tileHeight);
             // iterate through grid
             // -- start 0,0 representing top-left corner
             for (var y=0; y<layer.height; y++)
