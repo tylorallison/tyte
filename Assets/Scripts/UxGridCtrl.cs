@@ -18,8 +18,10 @@ namespace TyTe {
     }
 
     public class UxGridCtrlCtx {
+        public Func<ToolKind> getCurrentToolFcn;
         public Func<SpriteRecord> getCurrentSpriteFcn;
         public Func<int,SpriteRecord> lookupSpriteFcn;
+        public Action<int> setSpriteFcn;
     }
 
     public class UxGridCtrl : MonoBehaviour {
@@ -104,12 +106,36 @@ namespace TyTe {
             layer.Set(pos.x, pos.y, record.id);
         }
 
+        void ClearTile(
+            Image img,
+            TilePos pos
+        ) {
+            if (img != null) {
+                img.sprite = null;
+                img.color = new Color(0,0,0,0);
+            }
+            layer.Set(pos.x, pos.y, 0);
+        }
+
         void OnTileClick(
             Image img,
             TilePos pos
         ) {
-            if (ctrlCtx.getCurrentSpriteFcn != null) {
+            switch (ctrlCtx.getCurrentToolFcn()) {
+            case ToolKind.paint:
                 AssignTile(img, pos, ctrlCtx.getCurrentSpriteFcn());
+                break;
+            case ToolKind.fill:
+                break;
+            case ToolKind.erase:
+                ClearTile(img, pos);
+                break;
+            case ToolKind.pick:
+                var id = layer.Get(pos.x, pos.y);
+                if (id != 0) {
+                    ctrlCtx.setSpriteFcn(id);
+                }
+                break;
             }
         }
 

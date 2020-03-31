@@ -61,25 +61,6 @@ namespace TyTe {
         void Setup() {
             if (ctx == null) return;
             // FIXME
-            // create dummy zone;
-            /*
-            zone = new Zone("test", 16, 16);
-
-            // create a dummy layer
-            var layer = new Layer("bg", 16, 16);
-            for (var y=0; y<layer.height; y++)
-            for (var x=0; x<layer.width; x++) {
-                layer.Set(x, y, 1);
-            }
-            zone.AddLayer(layer);
-            layer = new Layer("fg", 16, 16);
-            layer.Set(5, 5, 3);
-            zone.AddLayer(layer);
-
-            setup = true;
-
-            ctx.assignZoneFcn(zone);
-            */
             Load("test");
             setup = true;
         }

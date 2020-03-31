@@ -7,9 +7,10 @@ namespace TyTe {
 
     public class ProjectMgr : UxPanel {
         [Header("Controllers")]
+        public UxZoneMgrCtrl zoneCtrl;
+        public UxToolMgrCtrl toolCtrl;
         public UxSpriteMgrCtrl spriteCtrl;
         public UxLayerMgrCtrl layerCtrl;
-        public UxZoneMgrCtrl zoneCtrl;
         public UxGridMgrCtrl gridCtrl;
         [Header("Other UI elements")]
         public Button projectButton;
@@ -18,6 +19,7 @@ namespace TyTe {
         [Header("Managers")]
         public SpriteMgr spriteMgr;
         public LayerMgr layerMgr;
+        public ToolMgr toolMgr;
         public ZoneMgr zoneMgr;
         public bool setupStarted = false;
         public bool setupDone = false;
@@ -97,11 +99,22 @@ namespace TyTe {
                 yield return null;      // wait for next update
             }
 
+            // setup tool manager
+            toolMgr.AssignCtx( new ToolMgrCtx {
+                ctrl = toolCtrl,
+            });
+            // wait for manager to become ready
+            while (!toolMgr.ready) {
+                yield return null;      // wait for next update
+            }
+
             // setup grid manager
             gridCtrl.AssignCtx( new UxGridMgrCtrlCtx {
                 gridCtrlCtx = new UxGridCtrlCtx {
+                    getCurrentToolFcn = () => toolMgr.selected,
                     getCurrentSpriteFcn = () => spriteMgr.selected,
                     lookupSpriteFcn = spriteMgr.Lookup,
+                    setSpriteFcn = spriteMgr.Select,
                 },
             });
 

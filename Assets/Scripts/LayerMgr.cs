@@ -47,6 +47,10 @@ namespace TyTe {
                 ctx.layerCtrl.Add(zone.layers[i]);
                 ctx.gridCtrl.Add(zone.layers[i]);
             }
+            // select bottom layer
+            if (zone.layers.Length > 0) {
+                Select(zone.layers[zone.layers.Length-1], true);
+            }
         }
 
         public void Add() {
@@ -86,7 +90,7 @@ namespace TyTe {
             Layer layer,
             bool selected
         ) {
-            if (selectedLayer != null) {
+            if (selectedLayer != null && selected) {
                 ctx.layerCtrl.Select(selectedLayer, false);
                 ctx.gridCtrl.Select(selectedLayer, false);
 

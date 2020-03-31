@@ -29,9 +29,10 @@ namespace TyTe {
         // Ux references
         public RectTransform contentTransform;
         public GameObject spritePrefab;
+        public Button reloadButton;
         UxSpriteMgrCtrlCtx mgrCtx = null;
-        List<AvailSpriteCtx> ctxs = new List<AvailSpriteCtx>();
         AvailSpriteCtx currentCtx = null;
+        Dictionary<int,AvailSpriteCtx> ctxMap = new Dictionary<int, AvailSpriteCtx>();
 
         public bool ready { 
             get { return mgrCtx != null; }
@@ -41,27 +42,16 @@ namespace TyTe {
             UxSpriteMgrCtrlCtx mgrCtx
         ) {
             this.mgrCtx = mgrCtx;
+            // wire listeners
+            reloadButton.onClick.AddListener( () => { this.mgrCtx.reloadFcn(); });
         }
 
         public void Clear() {
-            for (var i=ctxs.Count-1; i>=0; i--) {
-                DeleteCtx(ctxs[i]);
-            }
-            currentCtx = null;
-        }
-
-        void DeleteCtx(
-            AvailSpriteCtx ctx
-        ) {
-            // clean up sprite gameobject
-            if (ctx.ctrl != null) {
+            foreach (var ctx in ctxMap.Values) {
                 Destroy(ctx.ctrl.gameObject);
             }
-            // remove from ctx list
-            ctxs.Remove(ctx);
-            if (currentCtx == ctx) {
-                currentCtx = null;
-            }
+            ctxMap.Clear();
+            currentCtx = null;
         }
 
         public void AddSprite(
@@ -87,8 +77,24 @@ namespace TyTe {
                     mgrCtx.selectSpriteFcn(record);
                     currentCtx = ctx;
                 });
+                // add to ctx map
+                ctxMap[record.id] = ctx;
             }
         }
+
+        public void SelectSprite(
+            SpriteRecord record
+        ) {
+            AvailSpriteCtx ctx;
+            if (ctxMap.TryGetValue(record.id, out ctx)) {
+                if (currentCtx != null) {
+                    currentCtx.ctrl.Select(false);
+                }
+                ctx.ctrl.Select(true);
+                currentCtx = ctx;
+            }
+        }
+
     }
 
 }

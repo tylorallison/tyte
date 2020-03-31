@@ -134,6 +134,10 @@ namespace TyTe {
                 // tell controller to add sprite
                 ctx.ctrl.AddSprite(records[i]);
             }
+            // first sprite becomes selected sprite
+            if (records.Length > 0) {
+                Select(records[0].id);
+            }
         }
 
         void Update() {
@@ -154,6 +158,18 @@ namespace TyTe {
             SpriteRecord record = null;
             spriteMap.TryGetValue(id, out record);
             return record;
+        }
+
+        public void Select(
+            int id
+        ) {
+            SpriteRecord record = null;
+            spriteMap.TryGetValue(id, out record);
+            Debug.Log("trying to select: " + id + " w/ record: " + record);
+            if (record != null) {
+                selectedSprite = record;
+                ctx.ctrl.SelectSprite(record);
+            }
         }
 
     }
